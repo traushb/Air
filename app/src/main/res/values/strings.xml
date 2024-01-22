@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Air</string>
+    <string name="depart">DEPART</string>
+    <string name="arrive">ARRIVE</string>
+    <string name="placeholder">Search airports</string>
+    <string name="last_query">History</string>
+    <string name="bookmarked_flights">Bookmarked flights</string>
+    <string name="flights_from">Flights from %s</string>
+    <string name="background_alert">You don\'t have any bookmarked flights</string>
+</resources>

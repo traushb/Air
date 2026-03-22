@@ -79,12 +79,6 @@ class HomeViewModel(
                 initialValue = FavoriteUiState()
             )
 
-    init {
-        if (bookmarkedUiState.value.favoriteList.isNotEmpty()) {
-            cashedBookmarks()
-        }
-    }
-
     val iataWithName: StateFlow<IataNameState> =
         dao.getDepartureCode().map { IataNameState(it) }
             .stateIn(
@@ -109,17 +103,6 @@ class HomeViewModel(
             departureCode,
             destinationCode
         )
-    }
-
-    fun cashedBookmarks(): MutableMap<String, String> {
-        val bookmarks = mutableMapOf<String, String>()
-        val favorites = bookmarkedUiState.value.favoriteList
-        viewModelScope.launch {
-            favorites.forEach {
-                bookmarks[it.departureCoded] = it.destinationCode
-            }
-        }
-        return bookmarks
     }
 
     // DataStore

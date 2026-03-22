@@ -56,6 +56,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory)
 ) {
     val savedQueryDatStore by viewModel.dataStoreUiState.collectAsState()
+    val bookmarkedUiState by viewModel.bookmarkedUiState.collectAsState()
     val getDeparture by viewModel.iataWithName.collectAsState()
     val getDestination by viewModel.iataWithName2.collectAsState()
     var isHome by remember { mutableStateOf(true) }
@@ -70,7 +71,6 @@ fun HomeScreen(
         .collectAsState(emptyList())
 
     val uiStateAirport by viewModel.tappedAirportState.collectAsState()
-    val cachedBookmarks = viewModel.cashedBookmarks()
     var from by remember { mutableStateOf("") }
 
     Column {
@@ -156,22 +156,38 @@ fun HomeScreen(
                 viewModel = viewModel
             )
         } else {
-            if (cachedBookmarks.isEmpty() && isHome) {
-                FavoriteListResult(
-                    departure = getDeparture.iataNameState,
-                    destination = getDestination.iataNameState
-                )
-            } else {
-                if (!active && FavoriteUiState().favoriteList.isEmpty()) {
-                    EmptyScreenAbout(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 64.dp)
-                    )
+            if (isHome) {
+                when (homeScreenContentState(bookmarkedUiState.favoriteList.isEmpty())) {
+                    HomeScreenContentState.Favorites -> {
+                        FavoriteListResult(
+                            departure = getDeparture.iataNameState,
+                            destination = getDestination.iataNameState
+                        )
+                    }
+
+                    HomeScreenContentState.Empty -> {
+                        EmptyScreenAbout(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(bottom = 64.dp)
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+fun homeScreenContentState(hasNoFavorites: Boolean): HomeScreenContentState =
+    if (hasNoFavorites) {
+        HomeScreenContentState.Empty
+    } else {
+        HomeScreenContentState.Favorites
+    }
+
+enum class HomeScreenContentState {
+    Empty,
+    Favorites
 }
 
 @Composable
@@ -297,7 +313,6 @@ fun AirportListResult(
                 modifier = Modifier
                     .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                     .clickable {
-                        viewModel.cashedBookmarks()
                         coroutineScope.launch {
                             if (isSaved) {
                                 viewModel.delete(
